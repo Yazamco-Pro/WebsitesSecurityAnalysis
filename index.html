@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyPro - Security Audit Tool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-dark: #001A72;
+            --primary-light: #0057FF;
+            --bg-light: #F8FAFC;
+            --bg-white: #FFFFFF;
+            --text-dark: #1E293B;
+            --text-gray: #64748B;
+            --border-color: #E2E8F0;
+            --success-color: #10B981;
+            --error-color: #EF4444;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            height: 100vh;
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .audit-panel {
+            background: var(--bg-white);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 600px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 2.5rem 2rem 1.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(180deg, var(--bg-white) 0%, #FAFBFC 100%);
+        }
+
+        .logo-container {
+            width: 200px;
+            height: auto;
+            margin: 0 auto 1.5rem auto;
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: auto;
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .panel-subtitle {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .panel-content {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            background: var(--bg-white);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(0, 87, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .help-text {
+            font-size: 0.8rem;
+            color: var(--text-gray);
+            margin-top: 0.25rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary-dark);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 26, 114, 0.2);
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-light);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 26, 114, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+            border-left: 4px solid;
+        }
+
+        .message.success {
+            background: #F0FDF4;
+            color: var(--success-color);
+            border-color: var(--success-color);
+            border-right: 1px solid #BBF7D0;
+            border-top: 1px solid #BBF7D0;
+            border-bottom: 1px solid #BBF7D0;
+        }
+
+        .message.error {
+            background: #FEF2F2;
+            color: var(--error-color);
+            border-color: var(--error-color);
+            border-right: 1px solid #FECACA;
+            border-top: 1px solid #FECACA;
+            border-bottom: 1px solid #FECACA;
+        }
+
+        .spinner {
+            display: none;
+            width: 14px;
+            height: 14px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .url-counter {
+            font-size: 0.8rem;
+            color: var(--text-gray);
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+                height: auto;
+                min-height: 100vh;
+                align-items: flex-start;
+                padding-top: 2rem;
+            }
+
+            .panel-header {
+                padding: 1.5rem 1.5rem 1rem 1.5rem;
+            }
+
+            .panel-content {
+                padding: 1.5rem;
+            }
+
+            body {
+                overflow: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="audit-panel">
+            <div class="panel-header">
+                <div class="logo-container">
+                    <img src="https://yazamcocoil.sharepoint.com/:i:/s/AutomationManagement/EV4-FIGEOPZDpBNVdA23kQwBwl0N2QUYO7GqzZNtuhHUPw?e=x9J3g9&download=1" alt="CyPro">
+                </div>
+                <h1 class="panel-title">Security Audit Tool</h1>
+                <p class="panel-subtitle">Submit websites for security analysis</p>
+            </div>
+
+            <div class="panel-content">
+                <div id="message" class="message"></div>
+
+                <form id="auditForm">
+                    <div class="form-group">
+                        <label for="websites" class="form-label">Website URLs</label>
+                        <textarea 
+                            id="websites" 
+                            name="websites" 
+                            class="form-textarea" 
+                            placeholder="https://example1.com&#10;https://example2.com&#10;https://example3.com"
+                            required></textarea>
+                        <div class="help-text">Enter one URL per line. Maximum 10 URLs per request.</div>
+                        <div class="url-counter" id="urlCounter">0 URLs</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-input" 
+                               placeholder="analyst@company.com" required>
+                        <div class="help-text">Reports will be sent to this email address</div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span id="btnText">Submit for Analysis</span>
+                        <span class="spinner" id="spinner"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Webhook URL configuration
+        const WEBHOOK_URL = 'https://prod-46.westeurope.logic.azure.com:443/workflows/a89b868caac44f06ac89c47b7524aa19/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=phaClX69Hn3gMb3uFpjLkbo33qhtkmvVdh5dtAJrp7U';
+
+        const websitesTextarea = document.getElementById('websites');
+        const urlCounter = document.getElementById('urlCounter');
+
+        // Update URL counter
+        websitesTextarea.addEventListener('input', function() {
+            const urls = this.value.trim().split('\n').filter(url => url.trim() !== '');
+            const count = urls.length;
+            urlCounter.textContent = `${count} URL${count !== 1 ? 's' : ''}`;
+            
+            if (count > 10) {
+                urlCounter.style.color = 'var(--error-color)';
+            } else {
+                urlCounter.style.color = 'var(--text-gray)';
+            }
+        });
+
+        document.getElementById('auditForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const spinner = document.getElementById('spinner');
+            const btnText = document.getElementById('btnText');
+            const messageDiv = document.getElementById('message');
+            
+            const websitesInput = document.getElementById('websites').value.trim();
+            const email = document.getElementById('email').value;
+            
+            // Parse URLs
+            const urls = websitesInput.split('\n')
+                .map(url => url.trim())
+                .filter(url => url !== '');
+            
+            // Validation
+            if (urls.length === 0) {
+                showMessage('Please enter at least one website URL', 'error');
+                return;
+            }
+
+            if (urls.length > 10) {
+                showMessage('Maximum 10 URLs allowed per request', 'error');
+                return;
+            }
+
+            if (!email) {
+                showMessage('Please enter an email address', 'error');
+                return;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showMessage('Please enter a valid email address', 'error');
+                return;
+            }
+
+            // URL validation
+            const invalidUrls = [];
+            const validUrls = [];
+
+            urls.forEach(url => {
+                try {
+                    new URL(url);
+                    validUrls.push(url);
+                } catch {
+                    invalidUrls.push(url);
+                }
+            });
+
+            if (invalidUrls.length > 0) {
+                showMessage(`Invalid URLs found: ${invalidUrls.join(', ')}`, 'error');
+                return;
+            }
+            
+            // Start loading
+            submitBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnText.textContent = 'Submitting...';
+            messageDiv.style.display = 'none';
+            
+            // Prepare data
+            const data = {
+                websites: validUrls,
+                email: email,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                source: 'internal_audit_tool',
+                requestType: 'bulk_security_audit',
+                urlCount: validUrls.length
+            };
+            
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    showMessage(`Analysis request submitted successfully for ${validUrls.length} website${validUrls.length !== 1 ? 's' : ''}. Reports will be sent to ${email}.`, 'success');
+                    document.getElementById('auditForm').reset();
+                    urlCounter.textContent = '0 URLs';
+                } else {
+                    throw new Error('Failed to submit analysis request');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('An error occurred while submitting your request. Please try again.', 'error');
+            } finally {
+                // Reset button
+                submitBtn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = 'Submit for Analysis';
+            }
+        });
+        
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+            
+            // Auto hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>
